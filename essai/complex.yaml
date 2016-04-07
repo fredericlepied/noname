@@ -1,0 +1,13 @@
+---
+- hosts: first
+  vars:
+    dest: /tmp/essai
+  roles:
+    - {role: mysql, fact_prefix: p01}
+    - {role: haproxy, fact_prefix: p02}
+- hosts: second
+  vars:
+    dest: /tmp/essai
+  roles:
+    - load_vars
+    - keystone

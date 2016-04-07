@@ -1,0 +1,97 @@
+name: ref-arch
+profiles:
+  install-server:
+    arity: 1
+    steps:
+      1:
+        roles:
+          - ironic
+  load-balancer:
+    arity: 2+n
+    steps:
+      2:
+        roles:
+          - loadbalancer
+  controller:
+    arity: 3+2n
+    steps:
+      1:
+        roles:
+          - mysql
+          - redis
+          - messaging
+          - memcached
+          - rbd
+      2:
+        roles:
+          - dashboard
+      3:
+        classes:
+          - identity
+          - storage::rbd::pools
+      4:
+        classes:
+          - compute::api
+          - compute::cert
+          - compute::conductor
+          - compute::consoleauth
+          - compute::consoleproxy
+          - compute::scheduler
+          - volume::api
+          - volume::scheduler
+          - volume::storage
+          - image::api
+          - image::registry
+          - telemetry::api
+          - telemetry::collector
+          - telemetry::alarmevaluator
+          - telemetry::alarmnotifier
+          - telemetry::notification
+          - network::controller
+          - orchestration::api
+          - orchestration::engine
+          - object::controller
+          - object::ringbuilder
+          - telemetry::centralagent
+      5:
+        classes:
+          - network::dhcp
+          - network::metadata
+          - network::lbaas
+          - network::l3
+  compute:
+    arity: 1+n
+    steps:
+      4:
+        classes:
+          - cloud::compute::hypervisor
+  storage:
+    arity: 3+1n
+    steps:
+      2:
+        classes:
+          - cloud::storage::rbd::osd
+          - cloud::object::storage
+
+ordered_profiles:
+  - install-server
+  - load-balancer
+  - controller
+  - compute
+  - storage
+
+# NOTE(flepied) this doesn't work right now. We need to find a way to
+# do it. Use glob?
+
+hosts:
+  *:
+    hw:
+      cpu:
+        logical:
+          number:
+            $nbcpu
+
+profiles:
+  controller:
+    configuration:
+      mysql_max_connections: {{ hw_nbcpu * 10 }}

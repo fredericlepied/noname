@@ -1,0 +1,9 @@
+---
+# tasks file for keystone
+
+- name: keystone conf file
+  blockinfile:
+    dest: "{{ dest }}/keystone.conf"
+    create: yes
+    block: |
+      keystone::database_connection: {{ mysql_endpoint[0] }}

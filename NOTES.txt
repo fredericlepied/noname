@@ -1,0 +1,113 @@
+-*- outline -*-
+
+* Random notes
+
+** examples of arch to support
+
+- keystone alone
+- Swift all in one
+- Ceph cluster
+- Galera cluster
+- OpenDaylight multi-node
+- kubernetes cluster
+- OpenShift on bare metal
+- devstack/packstack all in one
+- hyper converged
+- distributed
+- multi-sites scenarios
+- complex virtual apps deployments like Software Factory
+
+** configuration
+
+*** hardware settings
+
+hardware extracted settings are dumped under hw_<varname> inside the
+hosts/<hostname>/configuration section.
+
+*** puppet vs ansible
+
+All variables must be stored for puppet and ansible usages. Puppet in
+hiera and ansible in the vars files.
+
+We must not add variables for nothing so as much as we can we use the
+puppet variables directly in the configuration. So if we don't have to
+manipulate the value, we use directly the puppet variable name.
+
+*** open questions
+
+**** how do we compute the input for a role?
+
+For example, when we configure keystone, we want to take as input the
+location of the MySQL database or the LDAP database to use. We would
+like to not have to specify it. What would be awesome is to be able to
+create at the profile level a mysql role and then connect it to the
+keystone role and doing so the configuration will automatically set
+the right database connection for keystone.
+
+mysql -> url to access the db
+keystone <- mysql url/ldap url -> keystone url
+
+we want some kind of pipeline of configuration like:
+
+(mysql(host1);ldap(host1)) | keystone(host1) | swift(host2)
+
+galera(host1-3) | haproxy(host0) | keystone(host1-3) | haproxy(host0) | nova(host4-10)
+
+or using the profile abstraction:
+
+(mysql(saio);ldap(saio)) | keystone(saio) | swift(saio)
+
+galera(controller) | haproxy(loadbalancer) | keystone(controller) | haproxy(loadbalancer) | nova-api(controller)
+
+each role could create a file with the list of URIs that can be used
+to access the role.
+
+**** mapping from config to ansible
+
+profile -> roles/profile/<name>
+global config -> global settings in group_vars/all
+
+** pre run checks
+
+*** arity of the profiles
+
+checked using profiles/<name>/arity
+
+*** checks for errors in the name of variables
+
+Variables are extracted from the configuration, hosts/*/configuration
+and profiles/*/configuration sections.
+
+Extract all the variable in the ansible tree with :: in them and find
+them in puppet modules or display an error.
+
+Variables without :: must be used in the ansible tree somewhere or
+report an error.
+
+** generation
+
+*** for each profile
+
+roles/profile/<arch name>/<profile name>/vars/main.yaml with the
+variables from profiles/<profile name>/configuration
+
+*** for each profile and step
+
+roles/profile/<arch name>/<profile name>/step<step number>/meta/main.yaml:
+
+dependencies:
+  - common
+  - <role name>/install
+  - ...
+
+roles/profile/<arch name>/<profile name>/validate<step number>/meta/main.yaml:
+
+dependencies:
+  - <role name>/validate
+  - ...
+
+** names
+
+baremate
+ansipup
+ansible-puppeteer

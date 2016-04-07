@@ -1,0 +1,19 @@
+---
+# tasks file for haproxy
+
+- name: publish MySQL endpoint
+  set_fact:
+    mysql_endpoint: "mysql+pymysql://127.0.0.1:200/"
+
+- name: store facts
+  blockinfile:
+    dest: /tmp/output-facts.yaml
+    create: yes
+    block: |
+      mysql_endpoint:
+        - {{ mysql_endpoint }}
+
+- name: gather facts
+  fetch:
+    src: /tmp/output-facts.yaml
+    dest: "/tmp/fetched-facts/{{ fact_prefix }}"

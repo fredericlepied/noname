@@ -1,0 +1,7 @@
+---
+# tasks file for load_vars
+- name: load facts
+  include_vars:
+    "{{ item }}"
+  with_fileglob:
+    - "/tmp/*fetched-facts/*/*/tmp/*.yaml"

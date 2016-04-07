@@ -1,0 +1,84 @@
+arch: ref-arch
+hosts:
+  os-ci-test4:
+    provision: local
+    profile: install-server
+  =os-ci-test10-12:
+    provision: ironic
+    profile: controller
+    =ip: 10.151.68.54-56
+    =mac:
+      - d8:9d:67:1a:8f:58     # test10
+      - d8:9d:67:1a:41:7c     # test11
+      - d8:9d:67:32:12:a4     # test12
+    =mac1:
+      - d8:9d:67:1a:8f:59     # test10
+      - d8:9d:67:1a:41:7d     # test11
+      - d8:9d:67:32:12:a5     # test12
+    ipmi-user: jenkins
+    ipmi-password: jenkinspass
+    hw:
+      disk:
+        $disk1:
+          size:
+            100
+          slot:
+            $slot1
+        $disk2:
+          size:
+            2000
+          slot:
+            $slot2
+        $disk3:
+          size:
+            2000
+          slot:
+            $slot3
+        $disk3:
+          size:
+            2000
+          slot:
+            $slot3
+      system:
+        ipmi:
+          channel:
+            $ipmi-channel
+        product:
+          name:
+            ProLiant DL360p Gen8 (655651-B21)
+      network:
+        $eth:
+          serial:
+            $$mac
+        $eth1:
+          serial:
+            $$mac1
+    conf: prof1.configure
+configuration:
+  gateway: 10.151.68.3
+  netmask: 255.255.255.0
+  domain: ring.enovance.com
+  region: enovance-ci
+  dns_ips: 94.143.114.197
+  vip_public_fqdn: os-ci-vip.ring.enovance.com
+  vip_public_ip: 10.151.68.253
+  vip_admin_ip: 10.151.68.253
+  vip_internal_ip: 10.151.68.253
+  galera_ip: 10.151.68.253
+  vip_admin_fqdn: os-ci-vip.ring.enovance.com
+  vip_internal_fqdn: os-ci-vip.ring.enovance.com
+  verbose: false
+  debug: false
+profiles:
+  controller:
+    configuration:
+      keystone::db::mysql::password: keystone_mysql_password
+      keystone::verbose: {{ verbose }}
+      keystone::debug: {{ debug }}
+      keystone::database_connection: keystone_database_connection
+      keystone::admin_token: keystone_admin_token
+      keystone::service_name: httpd
+      keystone::wsgi::apache::ssl: false
+      keystone::roles::admin::email: test@example.tld
+      keystone::roles::admin::password: keystone_admin_password
+      keystone::endpoint::default_domain: admin
