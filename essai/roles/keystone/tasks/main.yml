@@ -6,4 +6,4 @@
     dest: "{{ dest }}/keystone.conf"
     create: yes
     block: |
-      keystone::database_connection: {{ mysql_endpoint[0] }}
+      keystone::database_connection: {{ mysql_endpoints[0] }}

@@ -3,5 +3,4 @@
 - name: load facts
   include_vars:
     "{{ item }}"
-  with_fileglob:
-    - "/tmp/*fetched-facts/*/*/tmp/*.yaml"
+  with_lines: "./process-fetched-facts fetched-facts/"
